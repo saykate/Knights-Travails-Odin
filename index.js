@@ -11,7 +11,7 @@ const allowedMoves = [
 const min = 0;
 const max = 7;
 const queue = [];
-const visited = new Set();
+const visited = new Map();
 
 const getPossibleMoves = ([x, y]) => {
   const possibleMoves = allowedMoves
@@ -29,18 +29,43 @@ const getPossibleMoves = ([x, y]) => {
     const moveString = move.toString();
     if (!visited.has(moveString)) {
       queue.push(move);
-      visited.add(moveString);
+      visited.set(moveString, [x, y]);
     }
   });
   return possibleMoves;
 };
 
 const knightMoves = (start, end) => {
-  if (start[0] === end[0] && start[1] === end[1]) {
-    return [start];
+  queue.push(start);
+  visited.set(start.toString(), null);
+
+  while (queue.length > 0) {
+    const currentSq = queue.shift();
+    if (currentSq[0] === end[0] && currentSq[1] === end[1]) {
+      const path = [];
+      let currentCoord = end;
+      while(currentCoord !== null) {
+        path.unshift(currentCoord);
+        currentCoord = visited.get(currentCoord.toString());
+      }
+      console.log(`You made it in ${path.length} moves! Here's your path:`);
+      path.forEach(coord => console.log(coord));
+      return path;
+    }
+
+    const nextSq = getPossibleMoves(currentSq);
+    for (const square of nextSq) {
+      const sqString = square.toString();
+
+      if(!visited.has(sqString)) {
+        queue.push(square);
+        visited.add(sqString);
+      }
+    }
   }
-  console.log("queue:", queue, "visited:", visited);
-  return getPossibleMoves(start);
+  console.log('No path found.');
+  return [];
 };
 
-knightMoves([3, 2], [5, 1]);
+knightMoves([1, 5], [5, 3]);
+
